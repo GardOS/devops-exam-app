@@ -1,1 +1,1 @@
-## App to demonstrate DevOps infra repo see <ref>
+## App to demonstrate DevOps infra repo see: ref

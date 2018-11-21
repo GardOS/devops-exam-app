@@ -6,6 +6,3 @@ spring:
   jpa:
     hibernate:
       ddl-auto: create-drop
-
-server:
-  port: 8090

@@ -74,6 +74,7 @@ class BookController {
         return ResponseEntity.status(201).build()
     }
 
+    @ApiOperation("Create or replace book")
     @PutMapping(consumes = [MediaType.APPLICATION_JSON_VALUE])
     fun replaceBook(
             @ApiParam("The new book which will replace the old one")

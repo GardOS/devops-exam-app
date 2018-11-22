@@ -1,5 +1,6 @@
 package no.exam.book.api
 
+import com.codahale.metrics.MetricRegistry
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.swagger.annotations.Api
@@ -30,11 +31,15 @@ import javax.validation.ConstraintViolationException as JavaxConstraintViolation
 @Validated
 class BookController {
     @Autowired
+    private lateinit var registry: MetricRegistry
+    @Autowired
     private lateinit var bookRepo: BookRepository
 
     @ApiOperation("Get all books")
     @GetMapping
     fun getAllBooks(): ResponseEntity<List<BookDto>> {
+        registry.meter("books").mark()
+
         return ResponseEntity.ok(BookConverter.transform(bookRepo.findAll()))
     }
 
@@ -45,6 +50,8 @@ class BookController {
             @PathVariable("id")
             pathId: Long
     ): ResponseEntity<Any> {
+        registry.meter("books").mark()
+
         val book = bookRepo.findOne(pathId)
                 ?: return ResponseEntity.status(404).body("Book with id: $pathId not found")
 
@@ -58,6 +65,8 @@ class BookController {
             @RequestBody
             dto: BookDto
     ): ResponseEntity<Any> {
+        registry.meter("books").mark()
+
         //Id is auto-generated and should not be specified
         if (dto.id != null) {
             return ResponseEntity.status(400).body("Id should not be specified")
@@ -81,6 +90,8 @@ class BookController {
             @RequestBody
             dto: BookDto
     ): ResponseEntity<Any> {
+        registry.meter("books").mark()
+
         val book = Book(
                 id = dto.id,
                 title = dto.title,
@@ -105,6 +116,8 @@ class BookController {
             @RequestBody
             jsonBook: String
     ): ResponseEntity<Any> {
+        registry.meter("books").mark()
+
         if (!bookRepo.exists(pathId))
             return ResponseEntity.status(404).body("book with id: $pathId not found")
 
@@ -160,6 +173,8 @@ class BookController {
             @PathVariable("id")
             pathId: Long
     ): ResponseEntity<Any> {
+        registry.meter("books").mark()
+
         if (!bookRepo.exists(pathId))
             return ResponseEntity.status(404).body("Book with id: $pathId not found")
 
@@ -168,10 +183,9 @@ class BookController {
         return ResponseEntity.status(204).build()
     }
 
-    //Catches validation errors and returns error status based on error
+    //Catches exception and returns error status based on error
     //Because of how spring wraps exceptions, a "search" is done for constraint violations
-    @ExceptionHandler(value = ([JavaxConstraintViolationException::class, HibernateConstraintViolationException::class,
-        DataIntegrityViolationException::class, TransactionSystemException::class]))
+    @ExceptionHandler(value = ([Exception::class]))
     fun handleValidationFailure(ex: Exception, response: HttpServletResponse): String {
         var cause: Throwable? = ex
         for (i in 0..4) { //Iterate 5 times max, since it might have infinite depth
@@ -181,6 +195,9 @@ class BookController {
             }
             cause = cause?.cause
         }
+
+        registry.counter("booksError").inc()
+
         response.status = HttpStatus.INTERNAL_SERVER_ERROR.value()
         return "Something went wrong processing the request"
     }

@@ -1,9 +1,0 @@
-spring:
-  datasource:
-    url: "jdbc:${DATABASE_URL}"
-  #   username: ${JDBC_DATABASE_USERNAME}
-  #   password: ${JDBC_DATABASE_PASSWORD}
-  jpa:
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
-    hibernate:
-      ddl-auto: create-drop

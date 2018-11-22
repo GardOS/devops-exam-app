@@ -8,6 +8,7 @@ import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import java.util.Random
 import org.hibernate.exception.ConstraintViolationException as HibernateConstraintViolationException
 import javax.validation.ConstraintViolationException as JavaxConstraintViolationException
 
@@ -24,11 +25,18 @@ class Greeting {
     @ApiOperation("Greet the user")
     @GetMapping
     fun greeting(): String {
-        registry.meter("greeting").mark()
-        return getHtml()
+        val timer = registry.timer("greetingTimer").time()
+        registry.counter("greeting").inc()
+
+        val waitTime = Random().nextInt(1000).toLong()
+        Thread.sleep(waitTime) //Demonstrate timer
+
+        val elapsedTime = timer.stop() / 1000000 //Nano -> milli
+
+        return getHtml(elapsedTime)
     }
 
-    fun getHtml(): String {
+    fun getHtml(time: Long): String {
         return """
 <!DOCTYPE html>
 <html lang="en">
@@ -44,6 +52,7 @@ class Greeting {
         <h2>
             For more info, check out: <a href="./swagger-ui.html">API-doc</a>
         </h2>
+        <h3>Load time: $time milliseconds</h3>
     </body>
 </html>
         """.trimIndent()

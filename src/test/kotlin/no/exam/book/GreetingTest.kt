@@ -1,4 +1,4 @@
-package no.gardos.book
+package no.exam.book
 
 import io.restassured.RestAssured
 import io.restassured.RestAssured.get

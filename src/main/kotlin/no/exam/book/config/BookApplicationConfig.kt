@@ -1,11 +1,11 @@
-package no.gardos.book.config
+package no.exam.book.config
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import no.gardos.book.model.Book
-import no.gardos.book.model.BookRepository
+import no.exam.book.model.Book
+import no.exam.book.model.BookRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.CommandLineRunner
 import org.springframework.context.annotation.Bean
@@ -30,7 +30,7 @@ class BookApplicationConfig {
                 .apiInfo(apiInfo())
                 .select()
                 .paths(PathSelectors.any())
-                .apis(RequestHandlerSelectors.basePackage("no.gardos.book"))
+                .apis(RequestHandlerSelectors.basePackage("no.exam.book"))
                 .build()
     }
 

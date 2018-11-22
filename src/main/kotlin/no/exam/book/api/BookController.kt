@@ -1,14 +1,14 @@
-package no.gardos.book.api
+package no.exam.book.api
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.swagger.annotations.Api
 import io.swagger.annotations.ApiOperation
 import io.swagger.annotations.ApiParam
-import no.gardos.book.model.Book
-import no.gardos.book.model.BookConverter
-import no.gardos.book.model.BookDto
-import no.gardos.book.model.BookRepository
+import no.exam.book.model.Book
+import no.exam.book.model.BookConverter
+import no.exam.book.model.BookDto
+import no.exam.book.model.BookRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.http.HttpStatus

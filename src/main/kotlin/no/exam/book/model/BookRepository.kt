@@ -1,4 +1,4 @@
-package no.gardos.book.model
+package no.exam.book.model
 
 import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Repository

@@ -1,4 +1,4 @@
-package no.gardos.book.api
+package no.exam.book.api
 
 import io.swagger.annotations.Api
 import io.swagger.annotations.ApiOperation

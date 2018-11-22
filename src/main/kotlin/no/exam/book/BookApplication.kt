@@ -1,4 +1,4 @@
-package no.gardos.book
+package no.exam.book
 
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication

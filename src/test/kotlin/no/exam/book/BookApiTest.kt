@@ -1,11 +1,11 @@
-package no.gardos.book
+package no.exam.book
 
 import io.restassured.RestAssured
 import io.restassured.RestAssured.*
 import io.restassured.http.ContentType
-import no.gardos.book.model.Book
-import no.gardos.book.model.BookDto
-import no.gardos.book.model.BookRepository
+import no.exam.book.model.Book
+import no.exam.book.model.BookDto
+import no.exam.book.model.BookRepository
 import org.hamcrest.Matchers.equalTo
 import org.junit.Assert.assertEquals
 import org.junit.Before

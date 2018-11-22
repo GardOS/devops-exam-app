@@ -1,4 +1,4 @@
-package no.gardos.book.model
+package no.exam.book.model
 
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty

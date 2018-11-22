@@ -1,4 +1,4 @@
-package no.gardos.book.model
+package no.exam.book.model
 
 import javax.persistence.Entity
 import javax.persistence.GeneratedValue

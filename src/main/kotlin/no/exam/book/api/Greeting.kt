@@ -1,7 +1,9 @@
 package no.exam.book.api
 
+import com.codahale.metrics.MetricRegistry
 import io.swagger.annotations.Api
 import io.swagger.annotations.ApiOperation
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
@@ -16,9 +18,13 @@ import javax.validation.ConstraintViolationException as JavaxConstraintViolation
 )
 @RestController
 class Greeting {
+    @Autowired
+    private lateinit var registry: MetricRegistry
+
     @ApiOperation("Greet the user")
     @GetMapping
-    fun getAllBooks(): String {
+    fun greeting(): String {
+        registry.meter("greeting").mark()
         return getHtml()
     }
 

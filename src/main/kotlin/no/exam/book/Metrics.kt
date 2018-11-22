@@ -1,5 +1,6 @@
 package no.exam.book
 
+import com.codahale.metrics.MetricAttribute
 import com.codahale.metrics.MetricFilter
 import com.codahale.metrics.MetricRegistry
 import com.codahale.metrics.graphite.Graphite
@@ -29,8 +30,29 @@ class Metrics {
                 .convertRatesTo(TimeUnit.SECONDS)
                 .convertDurationsTo(TimeUnit.MILLISECONDS)
                 .filter(MetricFilter.ALL)
+                .disabledMetricAttributes(getDisabledMetrics())
                 .build(graphite)
         reporter.start(1, TimeUnit.SECONDS)
         return reporter
+    }
+
+    fun getDisabledMetrics(): Set<MetricAttribute> {
+        return setOf(
+//                MetricAttribute.COUNT,
+//                MetricAttribute.MAX,
+//                MetricAttribute.MIN,
+//                MetricAttribute.MEAN,
+                MetricAttribute.M1_RATE,
+                MetricAttribute.M15_RATE,
+                MetricAttribute.M5_RATE,
+                MetricAttribute.MEAN_RATE,
+                MetricAttribute.P50,
+                MetricAttribute.P75,
+                MetricAttribute.P95,
+                MetricAttribute.P98,
+                MetricAttribute.P99,
+                MetricAttribute.P999,
+                MetricAttribute.STDDEV
+        )
     }
 }

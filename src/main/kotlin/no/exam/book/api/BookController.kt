@@ -53,7 +53,11 @@ class BookController {
         registry.meter("books").mark()
 
         val book = bookRepo.findOne(pathId)
-                ?: return ResponseEntity.status(404).body("Book with id: $pathId not found")
+
+        if(book == null){
+            registry.counter("books-bad-input").inc()
+            return ResponseEntity.status(404).body("book with id: $pathId not found")
+        }
 
         return ResponseEntity.ok(BookConverter.transform(book))
     }
@@ -69,6 +73,7 @@ class BookController {
 
         //Id is auto-generated and should not be specified
         if (dto.id != null) {
+            registry.counter("books-bad-input").inc()
             return ResponseEntity.status(400).body("Id should not be specified")
         }
 
@@ -118,8 +123,10 @@ class BookController {
     ): ResponseEntity<Any> {
         registry.meter("books").mark()
 
-        if (!bookRepo.exists(pathId))
+        if (!bookRepo.exists(pathId)) {
+            registry.counter("books-bad-input").inc()
             return ResponseEntity.status(404).body("book with id: $pathId not found")
+        }
 
         val updatedBook = bookRepo.findOne(pathId)
 
@@ -127,10 +134,12 @@ class BookController {
         try {
             jsonNode = ObjectMapper().readValue(jsonBook, JsonNode::class.java)
         } catch (e: Exception) {
+            registry.counter("books-bad-input").inc()
             return ResponseEntity.status(400).build()
         }
 
         if (jsonNode.has("id")) {
+            registry.counter("books-bad-input").inc()
             return ResponseEntity.status(409).build()
         }
 
@@ -139,7 +148,10 @@ class BookController {
             when {
                 nameNode.isNull -> updatedBook.title = null
                 nameNode.isTextual -> updatedBook.title = nameNode.asText()
-                else -> return ResponseEntity.status(400).build()
+                else -> {
+                    registry.counter("books-bad-input").inc()
+                    return ResponseEntity.status(400).build()
+                }
             }
         }
 
@@ -148,7 +160,10 @@ class BookController {
             when {
                 nameNode.isNull -> updatedBook.author = null
                 nameNode.isTextual -> updatedBook.author = nameNode.asText()
-                else -> return ResponseEntity.status(400).build()
+                else -> {
+                    registry.counter("books-bad-input").inc()
+                    return ResponseEntity.status(400).build()
+                }
             }
         }
 
@@ -157,7 +172,10 @@ class BookController {
             when {
                 nameNode.isNull -> updatedBook.edition = null
                 nameNode.isTextual -> updatedBook.edition = nameNode.asText()
-                else -> return ResponseEntity.status(400).build()
+                else -> {
+                    registry.counter("books-bad-input").inc()
+                    return ResponseEntity.status(400).build()
+                }
             }
         }
 
@@ -175,8 +193,10 @@ class BookController {
     ): ResponseEntity<Any> {
         registry.meter("books").mark()
 
-        if (!bookRepo.exists(pathId))
+        if (!bookRepo.exists(pathId)) {
+            registry.counter("books-bad-input").inc()
             return ResponseEntity.status(404).body("Book with id: $pathId not found")
+        }
 
         bookRepo.delete(pathId)
 
@@ -191,12 +211,13 @@ class BookController {
         for (i in 0..4) { //Iterate 5 times max, since it might have infinite depth
             if (cause is JavaxConstraintViolationException || cause is HibernateConstraintViolationException) {
                 response.status = HttpStatus.BAD_REQUEST.value()
+                registry.counter("books-bad-input").inc()
                 return "Invalid request"
             }
             cause = cause?.cause
         }
 
-        registry.counter("booksError").inc()
+        registry.counter("books-error").inc()
 
         response.status = HttpStatus.INTERNAL_SERVER_ERROR.value()
         return "Something went wrong processing the request"

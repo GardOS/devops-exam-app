@@ -14,13 +14,18 @@ import java.util.concurrent.TimeUnit
 class Metrics {
 
     @Bean
-    fun getRegistry() : MetricRegistry{ return MetricRegistry()}
+    fun getRegistry(): MetricRegistry {
+        return MetricRegistry()
+    }
 
     @Bean
     fun getReporter(registry: MetricRegistry): GraphiteReporter {
-        val graphite = Graphite(InetSocketAddress(System.getenv("GRAPHITE_HOST"), 2003))
+        val host = if (System.getenv("GRAPHITE_HOST") != null) System.getenv("GRAPHITE_HOST") else ""
+        val key = if (System.getenv("HOSTEDGRAPHITE_APIKEY") != null) System.getenv("HOSTEDGRAPHITE_APIKEY") else ""
+
+        val graphite = Graphite(InetSocketAddress(host, 2003))
         val reporter = GraphiteReporter.forRegistry(registry)
-                .prefixedWith(System.getenv("HOSTEDGRAPHITE_APIKEY"))
+                .prefixedWith(key)
                 .convertRatesTo(TimeUnit.SECONDS)
                 .convertDurationsTo(TimeUnit.MILLISECONDS)
                 .filter(MetricFilter.ALL)

@@ -8,7 +8,7 @@ import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import java.util.Random
+import java.util.*
 import org.hibernate.exception.ConstraintViolationException as HibernateConstraintViolationException
 import javax.validation.ConstraintViolationException as JavaxConstraintViolationException
 
@@ -28,7 +28,7 @@ class Greeting {
         val timer = registry.timer("greetingTimer").time()
         registry.counter("greeting").inc()
 
-        val waitTime = Random().nextInt(1000).toLong()
+        val waitTime = Random().nextInt(100).toLong()
         Thread.sleep(waitTime) //Demonstrate timer
 
         val elapsedTime = timer.stop() / 1000000 //Nano -> milli

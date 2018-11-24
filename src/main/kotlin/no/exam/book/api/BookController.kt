@@ -11,11 +11,9 @@ import no.exam.book.model.BookConverter
 import no.exam.book.model.BookDto
 import no.exam.book.model.BookRepository
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
-import org.springframework.transaction.TransactionSystemException
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 import javax.servlet.http.HttpServletResponse

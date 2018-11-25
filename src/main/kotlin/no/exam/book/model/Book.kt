@@ -14,4 +14,8 @@ class Book(
         @get:NotNull
         var author: String? = null,
         var edition: String? = null
-)
+) {
+        override fun toString(): String {
+                return "Book(id=$id, title=$title, author=$author, edition=$edition)"
+        }
+}

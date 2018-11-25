@@ -17,4 +17,8 @@ data class BookDto(
 
         @ApiModelProperty("What edition the book is")
         var edition: String? = null
-) : Serializable
+) : Serializable {
+        override fun toString(): String {
+                return "BookDto(id=$id, title=$title, author=$author, edition=$edition)"
+        }
+}

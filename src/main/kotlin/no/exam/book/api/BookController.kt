@@ -40,7 +40,7 @@ class BookController {
     @ApiOperation("Get all books")
     @GetMapping
     fun getAllBooks(): ResponseEntity<List<BookDto>> {
-        logger.debug("GET /books")
+        logger.info("GET /books")
         registry.meter("books").mark()
 
         val books = bookRepo.findAll()
@@ -56,7 +56,7 @@ class BookController {
             @PathVariable("id")
             pathId: Long
     ): ResponseEntity<Any> {
-        logger.debug("GET /books/$pathId")
+        logger.info("GET /books/$pathId")
         registry.meter("books").mark()
 
         val book = bookRepo.findOne(pathId)
@@ -78,7 +78,7 @@ class BookController {
             @RequestBody
             dto: BookDto
     ): ResponseEntity<Any> {
-        logger.debug("POST /books. Input:\n$dto")
+        logger.info("POST /books. Input:\n$dto")
         registry.meter("books").mark()
 
         //Id is auto-generated and should not be specified
@@ -107,7 +107,7 @@ class BookController {
             @RequestBody
             dto: BookDto
     ): ResponseEntity<Any> {
-        logger.debug("PUT /books. Input:\n$dto")
+        logger.info("PUT /books. Input:\n$dto")
         registry.meter("books").mark()
 
         val book = Book(
@@ -135,7 +135,7 @@ class BookController {
             @RequestBody
             jsonBook: String
     ): ResponseEntity<Any> {
-        logger.debug("PATCH /books/$pathId. Input:\n$jsonBook")
+        logger.info("PATCH /books/$pathId. Input:\n$jsonBook")
         registry.meter("books").mark()
 
         if (!bookRepo.exists(pathId)) {
@@ -214,7 +214,7 @@ class BookController {
             @PathVariable("id")
             pathId: Long
     ): ResponseEntity<Any> {
-        logger.debug("DELETE /books/$pathId")
+        logger.info("DELETE /books/$pathId")
         registry.meter("books").mark()
 
         if (!bookRepo.exists(pathId)) {

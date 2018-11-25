@@ -30,7 +30,7 @@ class Greeting {
     @ApiOperation("Greet the user")
     @GetMapping
     fun greeting(): String {
-        logger.debug("GET /")
+        logger.info("GET /")
 
         val timer = registry.timer("greetingTimer").time()
         registry.counter("greeting").inc()

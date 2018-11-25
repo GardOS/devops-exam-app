@@ -66,7 +66,7 @@ class BookController {
             registry.counter("books-bad-input").inc()
             return ResponseEntity.status(404).body("Book with id: $pathId not found")
         }
-        logger.debug("GET /books/$pathId. returning book:\n${book}")
+        logger.debug("GET /books/$pathId. returning book:\n$book")
 
         return ResponseEntity.ok(BookConverter.transform(book))
     }
@@ -232,22 +232,23 @@ class BookController {
     //Catches exception and returns error status based on error
     //Because of how spring wraps exceptions, a "search" is done for constraint violations
     @ExceptionHandler(value = ([Exception::class]))
-    fun handleValidationFailure(ex: Exception, response: HttpServletResponse): String {
+    fun handleValidationFailure(ex: Exception, response: HttpServletResponse): String? {
         var cause: Throwable? = ex
         for (i in 0..4) { //Iterate 5 times max, since it might have infinite depth
             if (cause is JavaxConstraintViolationException || cause is HibernateConstraintViolationException) {
-                logger.warn("/books. Validation exception thrown. Cause: $cause. Message: ${ex.message}")
+                logger.warn("/books. Validation exception thrown. Cause: $cause")
                 registry.counter("books-bad-input").inc()
 
-                response.status = HttpStatus.BAD_REQUEST.value()
-                return "Invalid request"
+                response.sendError(HttpStatus.BAD_REQUEST.value(), "Invalid request")
+
+                return null
             }
             cause = cause?.cause
         }
-        logger.error("/books. Exception thrown. Cause: $cause. Message: ${ex.message}")
+        logger.error("/books. Exception thrown. Cause: $cause")
         registry.counter("books-error").inc()
 
-        response.status = HttpStatus.INTERNAL_SERVER_ERROR.value()
-        return "Something went wrong processing the request"
+        response.sendError(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Something went wrong processing the request")
+        return null
     }
 }

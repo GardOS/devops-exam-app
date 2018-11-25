@@ -3,6 +3,7 @@ package no.exam.book
 import io.restassured.RestAssured
 import io.restassured.RestAssured.get
 import junit.framework.TestCase.assertNotNull
+import junit.framework.TestCase.fail
 import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Test
@@ -31,6 +32,11 @@ class GreetingTest {
 
     @LocalServerPort
     protected var port = 0
+
+    @Test
+    fun test_fail() {
+        fail()
+    }
 
     @Test
     fun greeting_ok() {

@@ -4,3 +4,8 @@ server:
 graphite:
   host: ${GRAPHITE_HOST:""}
   apiKey: ${HOSTEDGRAPHITE_APIKEY:""}
+
+logging:
+  level:
+    no.exam.book.api.Greeting: DEBUG
+    no.exam.book.api.BookController: DEBUG

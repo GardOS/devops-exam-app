@@ -10,6 +10,8 @@ import no.exam.book.model.Book
 import no.exam.book.model.BookConverter
 import no.exam.book.model.BookDto
 import no.exam.book.model.BookRepository
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -28,6 +30,8 @@ import javax.validation.ConstraintViolationException as JavaxConstraintViolation
 @RestController
 @Validated
 class BookController {
+    var logger: Logger = LoggerFactory.getLogger(BookController::class.java)
+
     @Autowired
     private lateinit var registry: MetricRegistry
     @Autowired
@@ -36,9 +40,13 @@ class BookController {
     @ApiOperation("Get all books")
     @GetMapping
     fun getAllBooks(): ResponseEntity<List<BookDto>> {
+        logger.debug("GET /books")
         registry.meter("books").mark()
 
-        return ResponseEntity.ok(BookConverter.transform(bookRepo.findAll()))
+        val books = bookRepo.findAll()
+        logger.debug("GET /books. returning books:\n$books")
+
+        return ResponseEntity.ok(BookConverter.transform(books))
     }
 
     @ApiOperation("Get book by id")
@@ -48,14 +56,17 @@ class BookController {
             @PathVariable("id")
             pathId: Long
     ): ResponseEntity<Any> {
+        logger.debug("GET /books/$pathId")
         registry.meter("books").mark()
 
         val book = bookRepo.findOne(pathId)
 
-        if(book == null){
+        if (book == null) {
+            logger.debug("GET /books/$pathId. Book with id: $pathId not found")
             registry.counter("books-bad-input").inc()
-            return ResponseEntity.status(404).body("book with id: $pathId not found")
+            return ResponseEntity.status(404).body("Book with id: $pathId not found")
         }
+        logger.debug("GET /books/$pathId. returning book:\n${book}")
 
         return ResponseEntity.ok(BookConverter.transform(book))
     }
@@ -67,21 +78,24 @@ class BookController {
             @RequestBody
             dto: BookDto
     ): ResponseEntity<Any> {
+        logger.debug("POST /books. Input:\n$dto")
         registry.meter("books").mark()
 
         //Id is auto-generated and should not be specified
         if (dto.id != null) {
+            logger.debug("POST /books. Id specified")
             registry.counter("books-bad-input").inc()
             return ResponseEntity.status(400).body("Id should not be specified")
         }
 
-        bookRepo.save(
+        val book = bookRepo.save(
                 Book(
                         title = dto.title,
                         author = dto.author,
                         edition = dto.edition
                 )
         )
+        logger.debug("POST /books. Book created:\n$book")
 
         return ResponseEntity.status(201).build()
     }
@@ -93,6 +107,7 @@ class BookController {
             @RequestBody
             dto: BookDto
     ): ResponseEntity<Any> {
+        logger.debug("PUT /books. Input:\n$dto")
         registry.meter("books").mark()
 
         val book = Book(
@@ -104,7 +119,8 @@ class BookController {
 
         val status = if (book.id == null) 201 else 204
 
-        bookRepo.save(book)
+        val savedBook = bookRepo.save(book)
+        logger.debug("PUT /books. Status: $status savedBook:\n$savedBook. ")
 
         return ResponseEntity.status(status).build()
     }
@@ -119,24 +135,29 @@ class BookController {
             @RequestBody
             jsonBook: String
     ): ResponseEntity<Any> {
+        logger.debug("PATCH /books/$pathId. Input:\n$jsonBook")
         registry.meter("books").mark()
 
         if (!bookRepo.exists(pathId)) {
+            logger.debug("PATCH /books/$pathId. Book with id: $pathId not found")
             registry.counter("books-bad-input").inc()
             return ResponseEntity.status(404).body("book with id: $pathId not found")
         }
 
-        val updatedBook = bookRepo.findOne(pathId)
+        val book = bookRepo.findOne(pathId)
+        logger.debug("PATCH /books/$pathId. Found book:\n$book")
 
         val jsonNode: JsonNode
         try {
             jsonNode = ObjectMapper().readValue(jsonBook, JsonNode::class.java)
         } catch (e: Exception) {
+            logger.debug("PATCH /books/$pathId. JSON invalid")
             registry.counter("books-bad-input").inc()
             return ResponseEntity.status(400).build()
         }
 
         if (jsonNode.has("id")) {
+            logger.debug("PATCH /books/$pathId. JSON invalid")
             registry.counter("books-bad-input").inc()
             return ResponseEntity.status(409).build()
         }
@@ -144,9 +165,10 @@ class BookController {
         if (jsonNode.has("title")) {
             val nameNode = jsonNode.get("title")
             when {
-                nameNode.isNull -> updatedBook.title = null
-                nameNode.isTextual -> updatedBook.title = nameNode.asText()
+                nameNode.isNull -> book.title = null
+                nameNode.isTextual -> book.title = nameNode.asText()
                 else -> {
+                    logger.debug("PATCH /books/$pathId. Invalid title")
                     registry.counter("books-bad-input").inc()
                     return ResponseEntity.status(400).build()
                 }
@@ -156,9 +178,10 @@ class BookController {
         if (jsonNode.has("author")) {
             val nameNode = jsonNode.get("author")
             when {
-                nameNode.isNull -> updatedBook.author = null
-                nameNode.isTextual -> updatedBook.author = nameNode.asText()
+                nameNode.isNull -> book.author = null
+                nameNode.isTextual -> book.author = nameNode.asText()
                 else -> {
+                    logger.debug("PATCH /books/$pathId. Invalid author")
                     registry.counter("books-bad-input").inc()
                     return ResponseEntity.status(400).build()
                 }
@@ -168,16 +191,18 @@ class BookController {
         if (jsonNode.has("edition")) {
             val nameNode = jsonNode.get("edition")
             when {
-                nameNode.isNull -> updatedBook.edition = null
-                nameNode.isTextual -> updatedBook.edition = nameNode.asText()
+                nameNode.isNull -> book.edition = null
+                nameNode.isTextual -> book.edition = nameNode.asText()
                 else -> {
+                    logger.debug("PATCH /books/$pathId. Invalid edition")
                     registry.counter("books-bad-input").inc()
                     return ResponseEntity.status(400).build()
                 }
             }
         }
 
-        bookRepo.save(updatedBook)
+        bookRepo.save(book)
+        logger.debug("PATCH /books. Updated book:\n$book")
 
         return ResponseEntity.status(204).build()
     }
@@ -189,14 +214,17 @@ class BookController {
             @PathVariable("id")
             pathId: Long
     ): ResponseEntity<Any> {
+        logger.debug("DELETE /books/$pathId")
         registry.meter("books").mark()
 
         if (!bookRepo.exists(pathId)) {
+            logger.debug("DELETE /books/$pathId. Book with id: $pathId not found")
             registry.counter("books-bad-input").inc()
             return ResponseEntity.status(404).body("Book with id: $pathId not found")
         }
 
         bookRepo.delete(pathId)
+        logger.debug("DELETE /books/$pathId. Book deleted")
 
         return ResponseEntity.status(204).build()
     }
@@ -208,13 +236,15 @@ class BookController {
         var cause: Throwable? = ex
         for (i in 0..4) { //Iterate 5 times max, since it might have infinite depth
             if (cause is JavaxConstraintViolationException || cause is HibernateConstraintViolationException) {
-                response.status = HttpStatus.BAD_REQUEST.value()
+                logger.warn("/books. Validation exception thrown. Cause: $cause. Message: ${ex.message}")
                 registry.counter("books-bad-input").inc()
+
+                response.status = HttpStatus.BAD_REQUEST.value()
                 return "Invalid request"
             }
             cause = cause?.cause
         }
-
+        logger.error("/books. Exception thrown. Cause: $cause. Message: ${ex.message}")
         registry.counter("books-error").inc()
 
         response.status = HttpStatus.INTERNAL_SERVER_ERROR.value()

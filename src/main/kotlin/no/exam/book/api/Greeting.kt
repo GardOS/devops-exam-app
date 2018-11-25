@@ -3,6 +3,8 @@ package no.exam.book.api
 import com.codahale.metrics.MetricRegistry
 import io.swagger.annotations.Api
 import io.swagger.annotations.ApiOperation
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.GetMapping
@@ -19,12 +21,17 @@ import javax.validation.ConstraintViolationException as JavaxConstraintViolation
 )
 @RestController
 class Greeting {
+
+    var logger: Logger = LoggerFactory.getLogger(Greeting::class.java)
+
     @Autowired
     private lateinit var registry: MetricRegistry
 
     @ApiOperation("Greet the user")
     @GetMapping
     fun greeting(): String {
+        logger.debug("GET /")
+
         val timer = registry.timer("greetingTimer").time()
         registry.counter("greeting").inc()
 
@@ -32,6 +39,7 @@ class Greeting {
         Thread.sleep(waitTime) //Demonstrate timer
 
         val elapsedTime = timer.stop() / 1000000 //Nano -> milli
+        logger.debug("GET /. Elapsed time: $elapsedTime")
 
         return getHtml(elapsedTime)
     }

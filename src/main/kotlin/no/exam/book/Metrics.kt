@@ -5,6 +5,7 @@ import com.codahale.metrics.MetricFilter
 import com.codahale.metrics.MetricRegistry
 import com.codahale.metrics.graphite.Graphite
 import com.codahale.metrics.graphite.GraphiteReporter
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
@@ -13,6 +14,11 @@ import java.util.concurrent.TimeUnit
 
 @Configuration
 class Metrics {
+    @Value("\${graphite.host}")
+    var graphiteHost: String? = null
+
+    @Value("\${graphite.apiKey}")
+    var graphiteApiKey: String? = null
 
     @Bean
     fun getRegistry(): MetricRegistry {
@@ -21,12 +27,9 @@ class Metrics {
 
     @Bean
     fun getReporter(registry: MetricRegistry): GraphiteReporter {
-        val host = if (System.getenv("GRAPHITE_HOST") != null) System.getenv("GRAPHITE_HOST") else ""
-        val key = if (System.getenv("HOSTEDGRAPHITE_APIKEY") != null) System.getenv("HOSTEDGRAPHITE_APIKEY") else ""
-
-        val graphite = Graphite(InetSocketAddress(host, 2003))
+        val graphite = Graphite(InetSocketAddress(graphiteHost, 2003))
         val reporter = GraphiteReporter.forRegistry(registry)
-                .prefixedWith(key)
+                .prefixedWith(graphiteApiKey)
                 .convertRatesTo(TimeUnit.SECONDS)
                 .convertDurationsTo(TimeUnit.MILLISECONDS)
                 .filter(MetricFilter.ALL)

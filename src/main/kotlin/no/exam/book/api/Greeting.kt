@@ -47,7 +47,6 @@ class Greeting {
         <title>Exam App</title>
     </head>
     <body>
-        <h1>V1</h1>
         <h1>Welcome to the book app/API</h1>
         <h2>You can perform rest operations under "/books"</h2>
         <h2>
